@@ -1,0 +1,27 @@
+# Banco de dados local
+data/negocio.db
+data/*.db
+
+# Arquivos temporários
+.tmp/
+
+# Credenciais e segredos
+.env
+credentials.json
+token.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# Streamlit cache
+.streamlit/secrets.toml
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
