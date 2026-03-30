@@ -1,73 +1,172 @@
-# Agent Instructions
+# Agent Instructions — Print Lab
 
-You're working inside the **WAT framework** (Workflows, Agents, Tools). This architecture separates concerns so that probabilistic AI handles reasoning while deterministic code handles execution. That separation is what makes this system reliable.
+Você está trabalhando no projeto **Print Lab**, uma plataforma de gestão de custos, margens e P&L para um negócio de impressão 3D. O projeto segue a arquitetura **WAT framework** (Workflows, Agents, Tools).
 
-## The WAT Architecture
+---
 
-**Layer 1: Workflows (The Instructions)**
-- Markdown SOPs stored in `workflows/`
-- Each workflow defines the objective, required inputs, which tools to use, expected outputs, and how to handle edge cases
-- Written in plain language, the same way you'd brief someone on your team
+## O Projeto
 
-**Layer 2: Agents (The Decision-Maker)**
-- This is your role. You're responsible for intelligent coordination.
-- Read the relevant workflow, run tools in the correct sequence, handle failures gracefully, and ask clarifying questions when needed
-- You connect intent to execution without trying to do everything yourself
-- Example: If you need to pull data from a website, don't attempt it directly. Read `workflows/scrape_website.md`, figure out the required inputs, then execute `tools/scrape_single_site.py`
+**Print Lab** é um app Streamlit local que permite ao dono do negócio:
+- Calcular o custo real de cada impressão 3D (material, energia, depreciação, mão de obra)
+- Gerenciar custos adicionais por produto (embalagem, frete, taxas de plataforma, impostos)
+- Registrar vendas diárias por canal (Instagram, WhatsApp, Feira, etc.)
+- Visualizar P&L completo com margem bruta e líquida
+- Acompanhar KPIs e comparativos mensais no Dashboard
 
-**Layer 3: Tools (The Execution)**
-- Python scripts in `tools/` that do the actual work
-- API calls, data transformations, file operations, database queries
-- Credentials and API keys are stored in `.env`
-- These scripts are consistent, testable, and fast
+**Repositório:** https://github.com/Lucasjnt/print-lab
+**Stack:** Python 3 · Streamlit · SQLite · DM Mono / Syne / Outfit (Google Fonts)
+**Tema:** Dark (`#080808`) com acento laranja filamento (`#f97316`)
 
-**Why this matters:** When AI tries to handle every step directly, accuracy drops fast. If each step is 90% accurate, you're down to 59% success after just five steps. By offloading execution to deterministic scripts, you stay focused on orchestration and decision-making where you excel.
+---
 
-## How to Operate
+## Arquitetura WAT
 
-**1. Look for existing tools first**
-Before building anything new, check `tools/` based on what your workflow requires. Only create new scripts when nothing exists for that task.
+### Layer 1 — Workflows (`workflows/`)
+SOPs em Markdown. Cada workflow define objetivo, inputs, ferramentas, outputs e edge cases.
+- `workflows/gestao_diaria.md` — rotina de uso diário do app
 
-**2. Learn and adapt when things fail**
-When you hit an error:
-- Read the full error message and trace
-- Fix the script and retest (if it uses paid API calls or credits, check with me before running again)
-- Document what you learned in the workflow (rate limits, timing quirks, unexpected behavior)
-- Example: You get rate-limited on an API, so you dig into the docs, discover a batch endpoint, refactor the tool to use it, verify it works, then update the workflow so this never happens after again
+### Layer 2 — Agent (você)
+Lê os workflows, executa ferramentas na sequência certa, trata erros e melhora o sistema continuamente. Não tenta fazer tudo diretamente — delega execução para os tools.
 
-**3. Keep workflows current**
-Workflows should evolve as you learn. When you find better methods, discover constraints, or encounter recurring issues, update the workflow. That said, don't create or overwrite workflows without asking unless I explicitly tell you to. These are your instructions and need to be preserved and refined, not tossed after one use.
+### Layer 3 — Tools (`tools/`)
+Scripts Python determinísticos que fazem o trabalho real:
 
-## The Self-Improvement Loop
+| Arquivo | Responsabilidade |
+|---|---|
+| `tools/db.py` | Conexão SQLite, init do banco, todo CRUD (insert/update/delete/list) |
+| `tools/calcular_custo.py` | Lógica de custo de impressão 3D + custos adicionais + margens |
+| `tools/calcular_margem.py` | P&L por período, ranking de produtos |
+| `tools/relatorios.py` | Exportação CSV de P&L e ranking |
+| `tools/styles.py` | Design system: CSS global, `aplicar_css()`, `kpi_cards()`, `secao()`, `margem_cor()` |
 
-Every failure is a chance to make the system stronger:
-1. Identify what broke
-2. Fix the tool
-3. Verify the fix works
-4. Update the workflow with the new approach
-5. Move on with a more robust system
+---
 
-This loop is how the framework improves over time.
+## Banco de Dados (`data/negocio.db`)
 
-## File Structure
+SQLite local. Tabelas:
 
-**What goes where:**
-- **Deliverables**: Final outputs go to cloud services (Google Sheets, Slides, etc.) where I can access them directly
-- **Intermediates**: Temporary processing files that can be regenerated
+| Tabela | Descrição |
+|---|---|
+| `impressoras` | Equipamentos com custo, vida útil (h) e consumo (W) |
+| `materiais` | Filamentos/resinas com tipo e custo/kg |
+| `produtos` | Catálogo com FK para material e impressora |
+| `custos_produto` | Custos adicionais por produto (fixo R$/unit ou % do preço) |
+| `vendas` | Registro de vendas com data, canal, qtd e preço |
+| `custos_fixos` | Despesas fixas mensais/anuais (aluguel, internet, etc.) |
 
-**Directory layout:**
+**Nunca commitar `data/negocio.db`** — está no `.gitignore`.
+
+---
+
+## Lógica de Cálculo
+
+### Custo de impressão 3D
 ```
-.tmp/           # Temporary files (scraped data, intermediate exports). Regenerated as needed.
-tools/          # Python scripts for deterministic execution
-workflows/      # Markdown SOPs defining what to do and how
-.env            # API keys and environment variables (NEVER store secrets anywhere else)
-credentials.json, token.json  # Google OAuth (gitignored)
+custo_material    = peso_g / 1000 * custo_por_kg
+custo_energia     = (watts / 1000) * tempo_h * tarifa_kwh
+custo_depreciacao = (custo_aquisicao / vida_util_horas) * tempo_h
+custo_mao_obra    = tempo_pos_proc_h * custo_mao_obra_h
 ```
 
-**Core principle:** Local files are just for processing. Anything I need to see or use lives in cloud services. Everything in `.tmp/` is disposable.
+### Custos adicionais por produto
+```
+tipo 'fixo'       → valor R$ por unidade
+tipo 'percentual' → valor % × preco_venda / 100
+```
 
-## Bottom Line
+### P&L
+```
+receita_total    = SUM(preco_unit × qtd)
+cmv_total        = SUM(custo_total_produto × qtd)
+lucro_bruto      = receita_total − cmv_total
+margem_bruta_%   = lucro_bruto / receita_total × 100
+custos_fixos_mes = SUM(fixos mensais + anuais/12)
+lucro_liquido    = lucro_bruto − custos_fixos_mes
+margem_liquida_% = lucro_liquido / receita_total × 100
+```
 
-You sit between what I want (workflows) and what actually gets done (tools). Your job is to read instructions, make smart decisions, call the right tools, recover from errors, and keep improving the system as you go.
+---
 
-Stay pragmatic. Stay reliable. Keep learning.
+## Páginas do App
+
+| Arquivo | Rota | Função |
+|---|---|---|
+| `app.py` | `/` | Home com KPIs do mês e navegação |
+| `pages/01_Calculadora.py` | `/Calculadora` | Custo por produto cadastrado ou avulso |
+| `pages/02_Produtos.py` | `/Produtos` | CRUD completo: produtos, materiais, impressoras, custos adicionais |
+| `pages/03_Vendas.py` | `/Vendas` | Registro e histórico de vendas |
+| `pages/04_PL.py` | `/PL` | DRE, ranking, exportação CSV, custos fixos |
+| `pages/05_Dashboard.py` | `/Dashboard` | KPIs, gráficos, comparativo mensal |
+
+---
+
+## Design System (`tools/styles.py`)
+
+Importar em todas as páginas:
+```python
+from styles import aplicar_css, secao, kpi_cards, margem_cor, barra_margem
+```
+
+Funções disponíveis:
+- `aplicar_css()` — aplica o CSS global (chamar no topo de toda página)
+- `secao("Título")` — header de seção com acento laranja
+- `kpi_cards([{label, value, delta, delta_type}])` — grid de métricas
+- `margem_cor(pct)` — retorna cor (#4ade80 / #facc15 / #f87171) pela margem
+- `barra_margem(pct)` — HTML de barra visual de margem
+
+---
+
+## Configuração (`.env`)
+
+```
+TARIFA_KWH=0.85       # R$/kWh da sua conta de luz
+CUSTO_MOB_HORA=15.00  # R$/hora de mão de obra padrão
+MOEDA=BRL
+```
+
+Tema Streamlit em `.streamlit/config.toml`:
+```toml
+[theme]
+base = "dark"
+backgroundColor = "#080808"
+secondaryBackgroundColor = "#0d0d0d"
+primaryColor = "#f97316"
+```
+
+---
+
+## Como Rodar
+
+```bash
+cd "Caluladora de margem"
+streamlit run app.py
+# Abre em http://localhost:8501
+```
+
+**Primeiro uso:**
+1. Produtos → Impressoras → cadastrar impressora
+2. Produtos → Materiais → cadastrar material
+3. Produtos → cadastrar produto + adicionar custos extras
+4. P&L → Custos Fixos → cadastrar despesas fixas
+5. Vendas → registrar vendas
+
+---
+
+## Regras para o Agent
+
+1. **Antes de criar qualquer coisa**, verificar se já existe em `tools/` ou `pages/`
+2. **Toda nova página** deve importar `aplicar_css()` de `styles.py` como primeira instrução visual
+3. **Toda nova função de banco** deve seguir o padrão de `db.py`: `listar_X`, `inserir_X`, `atualizar_X`, `deletar_X`
+4. **Nunca commitar** `.env`, `data/negocio.db`, `credentials.json` ou `token.json`
+5. **Depois de alterar cálculos**, verificar se `calcular_margem.py` e as páginas de P&L/Dashboard refletem corretamente
+6. **Ao adicionar campos ao banco**, usar `ALTER TABLE` ou atualizar `init_db()` com `CREATE TABLE IF NOT EXISTS` — nunca dropar tabelas com dados
+
+---
+
+## Saúde de Margem (referência)
+
+| Margem Bruta | Situação |
+|---|---|
+| ≥ 50% | Excelente |
+| 30–49% | Aceitável |
+| < 30% | Atenção — pode não cobrir custos fixos |
