@@ -4,11 +4,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
 import streamlit as st
 import pandas as pd
 from datetime import date
-from db import listar_produtos, listar_vendas, inserir_venda, deletar_venda
-from styles import aplicar_css, secao, kpi_cards
+from db import listar_produtos, listar_vendas, inserir_venda, deletar_venda, inserir_fluxo_caixa, listar_custos_produto
+from styles import aplicar_css, secao, kpi_cards, sidebar_nav
 
-st.set_page_config(page_title="Vendas — Print Lab", page_icon="⬡", layout="wide")
+st.set_page_config(page_title="Vendas — Print Lab", page_icon="⬡", layout="wide", initial_sidebar_state="expanded")
 aplicar_css()
+sidebar_nav("vendas")
 
 CANAIS = ["Instagram", "WhatsApp", "Feira", "Site", "Indicação", "Outro"]
 CANAL_CORES = {
@@ -88,6 +89,24 @@ def form_registrar_venda():
 
         if st.form_submit_button("Registrar venda", type="primary", use_container_width=True):
             inserir_venda(prod_id, data_v, qtd, preco_unit, canal)
+
+            # Calcula receita líquida: desconta taxas de plataforma e impostos já cadastrados no produto
+            extras = listar_custos_produto(prod_id)
+            deducoes_unit = sum(
+                c["valor"] if c["tipo"] == "fixo" else preco_unit * c["valor"] / 100
+                for c in extras
+                if c.get("categoria") in ("taxa_plataforma", "imposto")
+            )
+            receita_liquida = (preco_unit - deducoes_unit) * qtd
+
+            inserir_fluxo_caixa(
+                data=data_v,
+                tipo="entrada",
+                categoria="Venda",
+                descricao=f"{qtd}× {produto_selecionado['nome']} ({canal})",
+                valor=receita_liquida,
+                impacta_pl=False,
+            )
             st.success(f"✓ Venda registrada: {qtd}× {produto_selecionado['nome']} — R$ {total_preview:.2f}")
 
 
@@ -124,51 +143,43 @@ def historico_vendas():
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("""
-        <div style="background:#ffffff;border:1px solid #e7e5e4;border-radius:10px;overflow:hidden;">
-          <div style="display:grid;grid-template-columns:90px 1fr 100px 60px 100px 100px;
-                      padding:0.6rem 1rem;border-bottom:1px solid #e7e5e4;background:#f5f5f4;">
-            <span style="font-size:0.68rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em">Data</span>
-            <span style="font-size:0.68rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em">Produto</span>
-            <span style="font-size:0.68rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em">Canal</span>
-            <span style="font-size:0.68rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em;text-align:center">Qtd</span>
-            <span style="font-size:0.68rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em;text-align:right">Unit</span>
-            <span style="font-size:0.68rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em;text-align:right">Total</span>
-          </div>
-        """, unsafe_allow_html=True)
+        st.markdown('<div style="background:#ffffff;border:1px solid #e7e5e4;border-radius:10px;overflow:hidden;">', unsafe_allow_html=True)
+        st.markdown(
+            '<div style="display:grid;grid-template-columns:90px 1fr 100px 60px 100px 100px 40px;'
+            'padding:0.6rem 1rem;border-bottom:1px solid #e7e5e4;background:#f5f5f4;">'
+            '<span style="font-size:0.68rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em">Data</span>'
+            '<span style="font-size:0.68rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em">Produto</span>'
+            '<span style="font-size:0.68rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em">Canal</span>'
+            '<span style="font-size:0.68rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em;text-align:center">Qtd</span>'
+            '<span style="font-size:0.68rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em;text-align:right">Unit</span>'
+            '<span style="font-size:0.68rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em;text-align:right">Total</span>'
+            '<span></span>'
+            '</div>',
+            unsafe_allow_html=True
+        )
 
         for v in vendas:
             total_linha = v["preco_unit"] * v["quantidade"]
             cor_canal = CANAL_CORES.get(v.get("canal", ""), "#78716c")
-            st.markdown(f"""
-          <div style="display:grid;grid-template-columns:90px 1fr 100px 60px 100px 100px;
-                      padding:0.75rem 1rem;border-bottom:1px solid #f5f5f4;align-items:center;">
-            <span style="font-family:'DM Mono',monospace;font-size:0.8rem;color:#a8a29e">{v['data']}</span>
-            <span style="color:#1c1917;font-size:0.9rem">{v['produto_nome']}</span>
-            <span style="font-size:0.75rem;padding:2px 8px;border-radius:4px;
-                         background:{cor_canal}15;color:{cor_canal};border:1px solid {cor_canal}40">
-              {v.get('canal','—')}
-            </span>
-            <span style="font-family:'DM Mono',monospace;color:#a8a29e;text-align:center">{v['quantidade']}</span>
-            <span style="font-family:'DM Mono',monospace;color:#57534e;text-align:right;font-size:0.85rem">R$ {v['preco_unit']:.2f}</span>
-            <span style="font-family:'DM Mono',monospace;color:#1c1917;text-align:right;font-weight:600">R$ {total_linha:.2f}</span>
-          </div>
-            """, unsafe_allow_html=True)
+            st.markdown(
+                f'<div style="display:grid;grid-template-columns:90px 1fr 100px 60px 100px 100px 40px;'
+                f'padding:0.65rem 1rem;border-bottom:1px solid #f5f5f4;align-items:center;">'
+                f'<span style="font-family:\'DM Mono\',monospace;font-size:0.8rem;color:#a8a29e">{v["data"]}</span>'
+                f'<span style="color:#1c1917;font-size:0.9rem">{v["produto_nome"]}</span>'
+                f'<span style="font-size:0.75rem;padding:2px 8px;border-radius:4px;'
+                f'background:{cor_canal}15;color:{cor_canal};border:1px solid {cor_canal}40">{v.get("canal","—")}</span>'
+                f'<span style="font-family:\'DM Mono\',monospace;color:#a8a29e;text-align:center">{v["quantidade"]}</span>'
+                f'<span style="font-family:\'DM Mono\',monospace;color:#57534e;text-align:right;font-size:0.85rem">R$ {v["preco_unit"]:.2f}</span>'
+                f'<span style="font-family:\'DM Mono\',monospace;color:#1c1917;text-align:right;font-weight:600">R$ {total_linha:.2f}</span>'
+                f'<span></span>'
+                f'</div>',
+                unsafe_allow_html=True
+            )
+            if st.button("✕", key=f"del_venda_{v['id']}", help="Excluir venda"):
+                deletar_venda(v["id"])
+                st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
-
-        st.markdown("<div style='height:1rem'></div>", unsafe_allow_html=True)
-        with st.expander("Remover venda"):
-            del_id = st.selectbox(
-                "Selecione",
-                [v["id"] for v in vendas],
-                format_func=lambda x: next(f"#{x} — {v['produto_nome']} em {v['data']}" for v in vendas if v["id"] == x),
-                label_visibility="collapsed",
-            )
-            if st.button("Confirmar remoção", type="secondary"):
-                deletar_venda(del_id)
-                st.success("Venda removida.")
-                st.rerun()
     else:
         st.markdown("""
         <div style="background:#ffffff;border:1px dashed #e7e5e4;border-radius:10px;

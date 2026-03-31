@@ -2,7 +2,7 @@ import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "tools"))
 
 from tools.db import init_db
-from tools.styles import aplicar_css, kpi_cards, secao
+from tools.styles import aplicar_css, kpi_cards, secao, sidebar_nav
 import streamlit as st
 from datetime import date
 
@@ -15,7 +15,9 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+
 aplicar_css()
+sidebar_nav("home")
 
 # ── Hero ──────────────────────────────────────────────────────────────────────
 st.markdown("""
@@ -69,7 +71,8 @@ except Exception:
 # ── Navegação ─────────────────────────────────────────────────────────────────
 secao("Navegação")
 
-col1, col2, col3, col4, col5 = st.columns(5)
+col1, col2, col3, col4 = st.columns(4)
+col5, col6, col7, _ = st.columns(4)
 
 nav_items = [
     (col1, "🧮", "Calculadora", "Simule custos de impressão e descubra a margem por produto"),
@@ -77,6 +80,8 @@ nav_items = [
     (col3, "💰", "Vendas", "Registre vendas diárias e acompanhe o histórico por canal"),
     (col4, "📊", "P&L", "Demonstrativo de resultado completo com exportação CSV"),
     (col5, "📈", "Dashboard", "KPIs, gráficos de receita e ranking de produtos"),
+    (col6, "💳", "FluxoCaixa", "Entradas e saídas reais de caixa com projeção de 30 dias"),
+    (col7, "📦", "Estoque", "Controle de filamentos e resinas com alertas de reposição"),
 ]
 
 for col, icon, titulo, desc in nav_items:

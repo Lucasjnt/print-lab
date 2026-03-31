@@ -6,13 +6,26 @@ import pandas as pd
 import calendar
 from datetime import date
 from calcular_margem import calcular_pl, ranking_produtos
-from db import listar_vendas
-from styles import aplicar_css, secao, kpi_cards, margem_cor
+from db import listar_vendas, obter_meta, upsert_meta, init_db
+from styles import aplicar_css, secao, kpi_cards, margem_cor, sidebar_nav
 
-st.set_page_config(page_title="Dashboard — Print Lab", page_icon="⬡", layout="wide")
+st.set_page_config(page_title="Dashboard — Print Lab", page_icon="⬡", layout="wide", initial_sidebar_state="expanded")
 aplicar_css()
+init_db()
+sidebar_nav("dashboard")
 
 hoje = date.today()
+
+# ── Metas na sidebar ──────────────────────────────────────────────────────────
+meta = obter_meta(hoje.year, hoje.month)
+with st.sidebar:
+    st.markdown('<div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#78716c;margin:0.5rem 0 0.75rem 0;">METAS DO MÊS</div>', unsafe_allow_html=True)
+    with st.form("form_metas"):
+        m_rec = st.number_input("Meta Receita (R$)", value=float(meta["meta_receita"]), min_value=0.0, step=100.0)
+        m_luc = st.number_input("Meta Lucro (R$)", value=float(meta["meta_lucro"]), min_value=0.0, step=50.0)
+        if st.form_submit_button("Salvar metas", use_container_width=True):
+            upsert_meta(hoje.year, hoje.month, m_rec, m_luc)
+            st.rerun()
 
 if hoje.month > 1:
     ant_ini = date(hoje.year, hoje.month - 1, 1)
@@ -73,6 +86,37 @@ kpi_cards([
     {"label": "Top Produto",  "value": top_prod[:16] + ("…" if len(top_prod)>16 else ""),
      "delta": f"{top_margem:.1f}% margem", "delta_type": "pos"},
 ])
+
+# ── Metas do mês ──────────────────────────────────────────────────────────────
+if meta["meta_receita"] > 0 or meta["meta_lucro"] > 0:
+    secao("Metas do Mês")
+    mc1, mc2 = st.columns(2)
+
+    def meta_card(col, label, atual, alvo, prefixo="R$"):
+        pct = min(100, (atual / alvo * 100)) if alvo > 0 else 0
+        cor = "#16a34a" if pct >= 100 else ("#d97706" if pct >= 60 else "#dc2626")
+        falta = max(0, alvo - atual)
+        fmt = lambda v: f"R$ {v:,.2f}" if prefixo == "R$" else f"{v:.1f}%"
+        col.markdown(
+            f'<div style="background:#ffffff;border:1px solid #e7e5e4;border-radius:12px;padding:1.25rem;">'
+            f'<div style="font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#a8a29e;margin-bottom:0.5rem">{label}</div>'
+            f'<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:0.75rem;">'
+            f'<div style="font-family:\'DM Mono\',monospace;font-size:1.6rem;color:{cor}">{fmt(atual)}</div>'
+            f'<div style="font-family:\'DM Mono\',monospace;font-size:0.85rem;color:#a8a29e">de {fmt(alvo)}</div>'
+            f'</div>'
+            f'<div style="background:#f5f5f4;border-radius:4px;height:8px;overflow:hidden;margin-bottom:0.5rem;">'
+            f'<div style="width:{pct:.0f}%;height:100%;background:{cor};border-radius:4px;transition:width 0.4s;"></div></div>'
+            f'<div style="display:flex;justify-content:space-between;font-size:0.78rem;">'
+            f'<span style="font-family:\'DM Mono\',monospace;color:{cor};font-weight:600">{pct:.1f}% atingido</span>'
+            f'<span style="color:#a8a29e">faltam {fmt(falta)}</span>'
+            f'</div></div>',
+            unsafe_allow_html=True
+        )
+
+    if meta["meta_receita"] > 0:
+        meta_card(mc1, "Meta de Receita", pl["receita_total"], meta["meta_receita"])
+    if meta["meta_lucro"] > 0:
+        meta_card(mc2, "Meta de Lucro Líquido", pl["lucro_liquido"], meta["meta_lucro"])
 
 vendas = listar_vendas(data_ini, data_fim)
 

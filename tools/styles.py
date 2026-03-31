@@ -25,7 +25,6 @@ section[data-testid="stMain"] > div,
 }}
 
 [data-testid="stHeader"] {{
-    border-bottom: 1px solid #e7e5e4 !important;
     background-color: #fafaf9 !important;
 }}
 
@@ -245,14 +244,74 @@ h3 {{
     font-family: 'Outfit', sans-serif !important;
 }}
 
+/* ── Hide default Streamlit page nav in sidebar ─────────────── */
+[data-testid="stSidebarNav"],
+[data-testid="stSidebarNavItems"],
+[data-testid="stSidebarNavLink"] {{
+    display: none !important;
+}}
+
 /* ── Sidebar ────────────────────────────────────────────────── */
 [data-testid="stSidebar"] {{
-    background: #f5f5f4 !important;
-    border-right: 1px solid #e7e5e4 !important;
+    background: #1c1917 !important;
+    border-right: none !important;
+    min-width: 260px !important;
+}}
+[data-testid="stSidebar"] > div:first-child {{
+    padding-top: 1.5rem !important;
 }}
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {{
-    color: #78716c !important;
-    font-size: 0.8rem !important;
+    color: #a8a29e !important;
+    font-size: 0.82rem !important;
+}}
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h1,
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h2,
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h3 {{
+    color: #fafaf9 !important;
+}}
+[data-testid="stSidebar"] hr {{
+    border-color: #292524 !important;
+}}
+[data-testid="stSidebar"] label {{
+    color: #a8a29e !important;
+}}
+[data-testid="stSidebar"] [data-testid="stNumberInput"] input {{
+    background: #292524 !important;
+    color: #fafaf9 !important;
+    border-color: #44403c !important;
+}}
+[data-testid="stSidebar"] [data-baseweb="input"] input {{
+    background: #292524 !important;
+    color: #fafaf9 !important;
+    border-color: #44403c !important;
+}}
+[data-testid="stSidebar"] [data-baseweb="select"] > div {{
+    background: #292524 !important;
+    color: #fafaf9 !important;
+    border-color: #44403c !important;
+}}
+
+/* Sidebar page_link styling */
+[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] {{
+    background: transparent !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.55rem 0.75rem !important;
+    margin: 2px 0 !important;
+    color: #a8a29e !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    transition: all 0.15s !important;
+}}
+[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"]:hover {{
+    background: #292524 !important;
+    color: #fafaf9 !important;
+}}
+[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"][aria-current="page"],
+[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"][data-active="true"] {{
+    background: #ea580c !important;
+    color: #ffffff !important;
 }}
 
 /* ── Divider ────────────────────────────────────────────────── */
@@ -325,6 +384,45 @@ hr {{ border-color: #e7e5e4 !important; margin: 1.5rem 0 !important; }}
 
 def aplicar_css():
     st.markdown(CSS, unsafe_allow_html=True)
+
+
+def sidebar_nav(pagina_atual: str = ""):
+    """Sidebar com logo, navegação e info. Chamar em toda página."""
+    with st.sidebar:
+        st.markdown("""
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.25rem;">
+          <div style="width:32px;height:32px;background:#ea580c;border-radius:8px;
+                      display:flex;align-items:center;justify-content:center;">
+            <span style="color:#fff;font-size:14px;font-weight:800;font-family:'Syne',sans-serif;">P</span>
+          </div>
+          <div>
+            <div style="font-size:0.95rem;font-weight:700;color:#fafaf9;letter-spacing:-0.01em;
+                        font-family:'Syne',sans-serif;">Print Lab</div>
+            <div style="font-size:0.65rem;color:#78716c;letter-spacing:0.06em;">GESTÃO DE IMPRESSÃO 3D</div>
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("---")
+
+        pages = [
+            ("home", "⬡  Home", "app.py"),
+            ("calculadora", "🧮  Calculadora", "pages/01_Calculadora.py"),
+            ("produtos", "📦  Produtos", "pages/02_Produtos.py"),
+            ("vendas", "💰  Vendas", "pages/03_Vendas.py"),
+            ("pl", "📊  P&L", "pages/04_PL.py"),
+            ("dashboard", "📈  Dashboard", "pages/05_Dashboard.py"),
+            ("fluxo", "💳  Fluxo de Caixa", "pages/06_FluxoCaixa.py"),
+            ("estoque", "📦  Estoque", "pages/07_Estoque.py"),
+        ]
+
+        for key, label, path in pages:
+            if key == pagina_atual:
+                st.page_link(path, label=label, icon=None, disabled=False)
+            else:
+                st.page_link(path, label=label, icon=None)
+
+        st.markdown("---")
 
 
 def secao(titulo: str):

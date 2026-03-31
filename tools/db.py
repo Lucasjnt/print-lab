@@ -80,6 +80,43 @@ def init_db():
         )
     """)
 
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS fluxo_caixa (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            data DATE NOT NULL,
+            tipo TEXT NOT NULL CHECK(tipo IN ('entrada', 'saida')),
+            categoria TEXT NOT NULL DEFAULT 'outro',
+            descricao TEXT,
+            valor REAL NOT NULL,
+            impacta_pl INTEGER NOT NULL DEFAULT 0
+        )
+    """)
+    # migração: adiciona coluna se já existia sem ela
+    try:
+        c.execute("ALTER TABLE fluxo_caixa ADD COLUMN impacta_pl INTEGER NOT NULL DEFAULT 0")
+    except Exception:
+        pass
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS estoque_materiais (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            material_id INTEGER NOT NULL UNIQUE REFERENCES materiais(id) ON DELETE CASCADE,
+            quantidade_kg REAL NOT NULL DEFAULT 0,
+            quantidade_minima_kg REAL NOT NULL DEFAULT 0.5
+        )
+    """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS metas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ano INTEGER NOT NULL,
+            mes INTEGER NOT NULL,
+            meta_receita REAL NOT NULL DEFAULT 0,
+            meta_lucro REAL NOT NULL DEFAULT 0,
+            UNIQUE(ano, mes)
+        )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -282,6 +319,90 @@ def atualizar_custo_produto(id_, nome, categoria, tipo, valor):
 def deletar_custo_produto(id_):
     with get_conn() as conn:
         conn.execute("DELETE FROM custos_produto WHERE id=?", (id_,))
+
+
+# ── Fluxo de Caixa ───────────────────────────────────────────────────────────
+
+CATEGORIAS_FLUXO_ENTRADA = ["Venda", "Recebimento", "Investimento", "Outro"]
+CATEGORIAS_FLUXO_SAIDA   = ["Material", "Equipamento", "Custo Fixo", "Marketing", "Imposto", "Outro"]
+
+def listar_fluxo_caixa(data_ini=None, data_fim=None):
+    sql = "SELECT * FROM fluxo_caixa WHERE 1=1"
+    params = []
+    if data_ini:
+        sql += " AND data >= ?"
+        params.append(str(data_ini))
+    if data_fim:
+        sql += " AND data <= ?"
+        params.append(str(data_fim))
+    sql += " ORDER BY data DESC, id DESC"
+    with get_conn() as conn:
+        return [dict(r) for r in conn.execute(sql, params)]
+
+
+def inserir_fluxo_caixa(data, tipo, categoria, descricao, valor, impacta_pl=False):
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO fluxo_caixa (data, tipo, categoria, descricao, valor, impacta_pl) VALUES (?,?,?,?,?,?)",
+            (str(data), tipo, categoria, descricao, valor, 1 if impacta_pl else 0),
+        )
+
+
+def deletar_fluxo_caixa(id_):
+    with get_conn() as conn:
+        conn.execute("DELETE FROM fluxo_caixa WHERE id=?", (id_,))
+
+
+# ── Estoque de Materiais ──────────────────────────────────────────────────────
+
+def listar_estoque():
+    with get_conn() as conn:
+        return [dict(r) for r in conn.execute("""
+            SELECT e.*, m.nome AS material_nome, m.tipo AS material_tipo, m.custo_por_kg
+            FROM estoque_materiais e
+            JOIN materiais m ON e.material_id = m.id
+            ORDER BY m.nome
+        """)]
+
+
+def obter_estoque_material(material_id):
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT * FROM estoque_materiais WHERE material_id=?", (material_id,)
+        ).fetchone()
+        return dict(row) if row else None
+
+
+def upsert_estoque(material_id, quantidade_kg, quantidade_minima_kg=0.5):
+    with get_conn() as conn:
+        conn.execute("""
+            INSERT INTO estoque_materiais (material_id, quantidade_kg, quantidade_minima_kg)
+            VALUES (?, ?, ?)
+            ON CONFLICT(material_id) DO UPDATE SET
+              quantidade_kg = excluded.quantidade_kg,
+              quantidade_minima_kg = excluded.quantidade_minima_kg
+        """, (material_id, quantidade_kg, quantidade_minima_kg))
+
+
+# ── Metas ─────────────────────────────────────────────────────────────────────
+
+def obter_meta(ano, mes):
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT * FROM metas WHERE ano=? AND mes=?", (ano, mes)
+        ).fetchone()
+        return dict(row) if row else {"meta_receita": 0.0, "meta_lucro": 0.0}
+
+
+def upsert_meta(ano, mes, meta_receita, meta_lucro):
+    with get_conn() as conn:
+        conn.execute("""
+            INSERT INTO metas (ano, mes, meta_receita, meta_lucro)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(ano, mes) DO UPDATE SET
+              meta_receita = excluded.meta_receita,
+              meta_lucro   = excluded.meta_lucro
+        """, (ano, mes, meta_receita, meta_lucro))
 
 
 if __name__ == "__main__":
