@@ -1,6 +1,5 @@
-# Banco de dados local
-data/negocio.db
-data/*.db
+# Banco de dados — repositório privado, db incluído intencionalmente
+# data/negocio.db
 
 # Arquivos temporários
 .tmp/
