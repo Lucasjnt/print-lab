@@ -1,9 +1,8 @@
 """
-Design system centralizado.
+Design system centralizado — Warm Neutral.
 Importar em todas as páginas: from styles import aplicar_css, margem_cor, barra_margem
 """
 import streamlit as st
-
 
 FONTS = "https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600&display=swap"
 
@@ -22,19 +21,19 @@ html, body, [class*="css"] {{
 section[data-testid="stMain"],
 section[data-testid="stMain"] > div,
 [data-testid="stHeader"] {{
-    background-color: #080808 !important;
+    background-color: #fafaf9 !important;
 }}
 
 [data-testid="stHeader"] {{
-    border-bottom: 1px solid #141414 !important;
+    border-bottom: 1px solid #e7e5e4 !important;
+    background-color: #fafaf9 !important;
 }}
 
-/* Remove padding padrão do Streamlit */
 .block-container {{
     padding-top: 2rem !important;
     padding-bottom: 4rem !important;
     max-width: 1200px !important;
-    background-color: #080808 !important;
+    background-color: #fafaf9 !important;
 }}
 
 /* ── Tipografia ─────────────────────────────────────────────── */
@@ -43,7 +42,7 @@ h1 {{
     font-size: 2.2rem !important;
     font-weight: 800 !important;
     letter-spacing: -0.03em !important;
-    color: #ffffff !important;
+    color: #1c1917 !important;
     line-height: 1.1 !important;
     margin-bottom: 0.25rem !important;
 }}
@@ -51,12 +50,12 @@ h2 {{
     font-family: 'Syne', sans-serif !important;
     font-size: 1.3rem !important;
     font-weight: 700 !important;
-    color: #e5e5e5 !important;
+    color: #1c1917 !important;
 }}
 h3 {{
     font-family: 'Syne', sans-serif !important;
     font-weight: 700 !important;
-    color: #d4d4d4 !important;
+    color: #292524 !important;
 }}
 
 /* ── Label uppercase ────────────────────────────────────────── */
@@ -65,7 +64,7 @@ h3 {{
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #737373;
+    color: #a8a29e;
     margin-bottom: 0.5rem;
     display: block;
 }}
@@ -74,42 +73,40 @@ h3 {{
 .kpi-grid {{
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1px;
-    background: #1a1a1a;
-    border-radius: 12px;
-    overflow: hidden;
+    gap: 12px;
     margin-bottom: 2rem;
-    border: 1px solid #1a1a1a;
 }}
 .kpi-card {{
-    background: #0f0f0f;
-    padding: 1.5rem 1.25rem;
+    background: #ffffff;
+    border: 1px solid #e7e5e4;
+    border-radius: 10px;
+    padding: 1.25rem;
     position: relative;
 }}
-.kpi-card:hover {{ background: #111; }}
+.kpi-card:hover {{ box-shadow: 0 2px 8px rgba(0,0,0,0.06); }}
 .kpi-label {{
     font-size: 0.68rem;
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #525252;
+    color: #a8a29e;
     margin-bottom: 0.5rem;
 }}
 .kpi-value {{
     font-family: 'DM Mono', monospace;
     font-size: 1.75rem;
     font-weight: 500;
-    color: #ffffff;
+    color: #1c1917;
     line-height: 1;
 }}
-.kpi-delta-pos {{ color: #4ade80; font-size: 0.8rem; font-family: 'DM Mono', monospace; }}
-.kpi-delta-neg {{ color: #f87171; font-size: 0.8rem; font-family: 'DM Mono', monospace; }}
-.kpi-delta-neu {{ color: #f97316; font-size: 0.8rem; font-family: 'DM Mono', monospace; }}
+.kpi-delta-pos {{ color: #16a34a; font-size: 0.8rem; font-family: 'DM Mono', monospace; }}
+.kpi-delta-neg {{ color: #dc2626; font-size: 0.8rem; font-family: 'DM Mono', monospace; }}
+.kpi-delta-neu {{ color: #ea580c; font-size: 0.8rem; font-family: 'DM Mono', monospace; }}
 
 /* ── Metric override ────────────────────────────────────────── */
 [data-testid="metric-container"] {{
-    background: #0f0f0f;
-    border: 1px solid #1e1e1e;
+    background: #ffffff;
+    border: 1px solid #e7e5e4;
     border-radius: 10px;
     padding: 1.25rem !important;
 }}
@@ -118,12 +115,12 @@ h3 {{
     font-weight: 600 !important;
     letter-spacing: 0.1em !important;
     text-transform: uppercase !important;
-    color: #525252 !important;
+    color: #a8a29e !important;
 }}
 [data-testid="stMetricValue"] {{
     font-family: 'DM Mono', monospace !important;
     font-size: 1.6rem !important;
-    color: #ffffff !important;
+    color: #1c1917 !important;
 }}
 [data-testid="stMetricDelta"] {{
     font-family: 'DM Mono', monospace !important;
@@ -136,10 +133,10 @@ h3 {{
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: #f97316;
+    color: #ea580c;
     margin: 1.75rem 0 1rem 0;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid #1e1e1e;
+    border-bottom: 1px solid #e7e5e4;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -149,45 +146,45 @@ h3 {{
     display: inline-block;
     width: 3px;
     height: 12px;
-    background: #f97316;
+    background: #ea580c;
     border-radius: 2px;
 }}
 
 /* ── Tabelas ────────────────────────────────────────────────── */
 [data-testid="stDataFrame"] {{
-    border: 1px solid #1e1e1e !important;
+    border: 1px solid #e7e5e4 !important;
     border-radius: 10px !important;
     overflow: hidden !important;
 }}
 
 /* ── Forms ──────────────────────────────────────────────────── */
 [data-testid="stForm"] {{
-    background: #0d0d0d;
-    border: 1px solid #1e1e1e;
+    background: #ffffff;
+    border: 1px solid #e7e5e4;
     border-radius: 12px;
     padding: 1.5rem !important;
 }}
 [data-baseweb="input"] input, [data-baseweb="textarea"] textarea {{
-    background: #141414 !important;
-    border-color: #2a2a2a !important;
-    color: #e5e5e5 !important;
+    background: #fafaf9 !important;
+    border-color: #e7e5e4 !important;
+    color: #1c1917 !important;
     font-family: 'Outfit', sans-serif !important;
 }}
 [data-baseweb="input"] input:focus {{
-    border-color: #f97316 !important;
-    box-shadow: 0 0 0 2px rgba(249,115,22,0.15) !important;
+    border-color: #ea580c !important;
+    box-shadow: 0 0 0 2px rgba(234,88,12,0.12) !important;
 }}
 [data-baseweb="select"] > div {{
-    background: #141414 !important;
-    border-color: #2a2a2a !important;
-    color: #e5e5e5 !important;
+    background: #fafaf9 !important;
+    border-color: #e7e5e4 !important;
+    color: #1c1917 !important;
 }}
 
 /* ── Buttons ────────────────────────────────────────────────── */
 [data-testid="baseButton-primary"] {{
-    background: #f97316 !important;
+    background: #ea580c !important;
     border: none !important;
-    color: #000 !important;
+    color: #ffffff !important;
     font-weight: 600 !important;
     font-family: 'Outfit', sans-serif !important;
     letter-spacing: 0.02em !important;
@@ -195,50 +192,50 @@ h3 {{
     transition: background 0.15s !important;
 }}
 [data-testid="baseButton-primary"]:hover {{
-    background: #fb923c !important;
+    background: #c2410c !important;
 }}
 [data-testid="baseButton-secondary"] {{
     background: transparent !important;
-    border: 1px solid #2a2a2a !important;
-    color: #737373 !important;
+    border: 1px solid #e7e5e4 !important;
+    color: #78716c !important;
     font-family: 'Outfit', sans-serif !important;
     border-radius: 8px !important;
 }}
 [data-testid="baseButton-secondary"]:hover {{
-    border-color: #ef4444 !important;
-    color: #ef4444 !important;
+    border-color: #dc2626 !important;
+    color: #dc2626 !important;
 }}
 
 /* ── Tabs ───────────────────────────────────────────────────── */
 [data-baseweb="tab-list"] {{
     background: transparent !important;
-    border-bottom: 1px solid #1e1e1e !important;
+    border-bottom: 1px solid #e7e5e4 !important;
     gap: 0 !important;
 }}
 [data-baseweb="tab"] {{
     background: transparent !important;
-    color: #525252 !important;
+    color: #a8a29e !important;
     font-family: 'Outfit', sans-serif !important;
     font-weight: 500 !important;
     padding: 0.75rem 1.25rem !important;
     border-radius: 0 !important;
 }}
 [aria-selected="true"][data-baseweb="tab"] {{
-    color: #f97316 !important;
-    border-bottom: 2px solid #f97316 !important;
+    color: #ea580c !important;
+    border-bottom: 2px solid #ea580c !important;
 }}
 
 /* ── Expander ───────────────────────────────────────────────── */
 [data-testid="stExpander"] {{
-    background: #0d0d0d !important;
-    border: 1px solid #1e1e1e !important;
+    background: #ffffff !important;
+    border: 1px solid #e7e5e4 !important;
     border-radius: 10px !important;
     margin-bottom: 0.5rem !important;
 }}
 [data-testid="stExpander"] summary {{
     font-family: 'Outfit', sans-serif !important;
     font-weight: 500 !important;
-    color: #d4d4d4 !important;
+    color: #1c1917 !important;
     padding: 1rem 1.25rem !important;
 }}
 
@@ -250,31 +247,31 @@ h3 {{
 
 /* ── Sidebar ────────────────────────────────────────────────── */
 [data-testid="stSidebar"] {{
-    background: #050505 !important;
-    border-right: 1px solid #141414 !important;
+    background: #f5f5f4 !important;
+    border-right: 1px solid #e7e5e4 !important;
 }}
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {{
-    color: #737373 !important;
+    color: #78716c !important;
     font-size: 0.8rem !important;
 }}
 
 /* ── Divider ────────────────────────────────────────────────── */
-hr {{ border-color: #1a1a1a !important; margin: 1.5rem 0 !important; }}
+hr {{ border-color: #e7e5e4 !important; margin: 1.5rem 0 !important; }}
 
 /* ── Mono values ────────────────────────────────────────────── */
 .mono {{
     font-family: 'DM Mono', monospace;
-    color: #a3a3a3;
+    color: #57534e;
 }}
 .mono-lg {{
     font-family: 'DM Mono', monospace;
     font-size: 1.4rem;
-    color: #ffffff;
+    color: #1c1917;
 }}
 
 /* ── Barra de margem ────────────────────────────────────────── */
 .margem-bar-wrap {{
-    background: #1a1a1a;
+    background: #f5f5f4;
     border-radius: 4px;
     height: 6px;
     width: 100%;
@@ -299,11 +296,11 @@ hr {{ border-color: #1a1a1a !important; margin: 1.5rem 0 !important; }}
     font-family: 'DM Mono', monospace;
     margin: 2px;
 }}
-.tag-embalagem    {{ background: rgba(59,130,246,0.12); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }}
-.tag-frete        {{ background: rgba(139,92,246,0.12); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.3); }}
-.tag-taxa         {{ background: rgba(245,158,11,0.12); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }}
-.tag-imposto      {{ background: rgba(239,68,68,0.12);  color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }}
-.tag-outro        {{ background: rgba(107,114,128,0.12);color: #d1d5db; border: 1px solid rgba(107,114,128,0.3); }}
+.tag-embalagem    {{ background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }}
+.tag-frete        {{ background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }}
+.tag-taxa         {{ background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }}
+.tag-imposto      {{ background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }}
+.tag-outro        {{ background: #f5f5f4; color: #57534e; border: 1px solid #e7e5e4; }}
 
 /* ── Canal badge ────────────────────────────────────────────── */
 .canal-badge {{
@@ -312,16 +309,16 @@ hr {{ border-color: #1a1a1a !important; margin: 1.5rem 0 !important; }}
     border-radius: 4px;
     font-size: 0.72rem;
     font-family: 'DM Mono', monospace;
-    background: #1a1a1a;
-    color: #a3a3a3;
-    border: 1px solid #2a2a2a;
+    background: #f5f5f4;
+    color: #57534e;
+    border: 1px solid #e7e5e4;
 }}
 
 /* ── Scrollbar ──────────────────────────────────────────────── */
 ::-webkit-scrollbar {{ width: 4px; height: 4px; }}
-::-webkit-scrollbar-track {{ background: #0a0a0a; }}
-::-webkit-scrollbar-thumb {{ background: #2a2a2a; border-radius: 2px; }}
-::-webkit-scrollbar-thumb:hover {{ background: #404040; }}
+::-webkit-scrollbar-track {{ background: #f5f5f4; }}
+::-webkit-scrollbar-thumb {{ background: #d6d3d1; border-radius: 2px; }}
+::-webkit-scrollbar-thumb:hover {{ background: #a8a29e; }}
 </style>
 """
 
@@ -336,11 +333,11 @@ def secao(titulo: str):
 
 def margem_cor(pct: float) -> str:
     if pct >= 50:
-        return "#4ade80"
+        return "#16a34a"
     elif pct >= 30:
-        return "#facc15"
+        return "#d97706"
     else:
-        return "#f87171"
+        return "#dc2626"
 
 
 def barra_margem(pct: float) -> str:
@@ -360,13 +357,13 @@ def kpi_cards(items: list):
     """
     n = len(items)
     cols_css = " ".join(["1fr"] * n)
-    html = f'<div style="display:grid;grid-template-columns:{cols_css};gap:1px;background:#1a1a1a;border-radius:12px;overflow:hidden;margin-bottom:1.5rem;border:1px solid #1a1a1a;">'
+    html = f'<div class="kpi-grid" style="grid-template-columns:{cols_css};">'
     for item in items:
         delta_html = ""
         if item.get("delta"):
             dt = item.get("delta_type", "neu")
             cls = f"kpi-delta-{dt}"
-            delta_html = f'<div class="{cls}">{item["delta"]}</div>'
+            delta_html = f'<div class="{cls}" style="margin-top:0.4rem">{item["delta"]}</div>'
         html += f"""
         <div class="kpi-card">
             <div class="kpi-label">{item["label"]}</div>

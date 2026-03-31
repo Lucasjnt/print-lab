@@ -2,7 +2,7 @@ import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "tools"))
 
 from tools.db import init_db
-from tools.styles import aplicar_css, kpi_cards, margem_cor, barra_margem, secao
+from tools.styles import aplicar_css, kpi_cards, secao
 import streamlit as st
 from datetime import date
 
@@ -20,11 +20,12 @@ aplicar_css()
 # ── Hero ──────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div style="margin-bottom:2.5rem;">
-  <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#f97316;margin-bottom:0.5rem;">
+  <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;
+              color:#ea580c;margin-bottom:0.5rem;">
     PRINT LAB
   </div>
   <h1 style="margin:0 0 0.5rem 0;">Gestão de<br>Impressão 3D</h1>
-  <p style="color:#525252;font-size:1rem;margin:0;max-width:480px;">
+  <p style="color:#a8a29e;font-size:1rem;margin:0;max-width:480px;">
     Controle completo de custos, margens e P&L para o seu negócio.
   </p>
 </div>
@@ -81,35 +82,35 @@ nav_items = [
 for col, icon, titulo, desc in nav_items:
     with col:
         st.markdown(f"""
-        <div style="background:#0d0d0d;border:1px solid #1e1e1e;border-radius:10px;
-                    padding:1.25rem;height:100%;cursor:pointer;transition:border-color 0.2s;"
-             onmouseover="this.style.borderColor='#f97316'"
-             onmouseout="this.style.borderColor='#1e1e1e'">
+        <div style="background:#ffffff;border:1px solid #e7e5e4;border-left:3px solid #ea580c;
+                    border-radius:10px;padding:1.25rem;height:100%;cursor:pointer;transition:box-shadow 0.2s;"
+             onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,0.08)'"
+             onmouseout="this.style.boxShadow='none'">
           <div style="font-size:1.5rem;margin-bottom:0.5rem">{icon}</div>
-          <div style="font-family:'Syne',sans-serif;font-weight:700;color:#fff;
+          <div style="font-family:'Syne',sans-serif;font-weight:700;color:#1c1917;
                       margin-bottom:0.4rem">{titulo}</div>
-          <div style="font-size:0.8rem;color:#525252;line-height:1.4">{desc}</div>
+          <div style="font-size:0.8rem;color:#a8a29e;line-height:1.4">{desc}</div>
         </div>
         """, unsafe_allow_html=True)
 
 # ── Quick start ───────────────────────────────────────────────────────────────
 secao("Início rápido")
 st.markdown("""
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#1a1a1a;border-radius:10px;overflow:hidden;border:1px solid #1a1a1a;">
-  <div style="background:#0d0d0d;padding:1rem 1.25rem;">
-    <div style="font-family:'DM Mono',monospace;color:#f97316;font-size:0.9rem;margin-bottom:0.4rem">01</div>
-    <div style="font-weight:600;color:#e5e5e5;margin-bottom:0.25rem">Cadastrar equipamento</div>
-    <div style="font-size:0.8rem;color:#525252">Em Produtos → Impressoras: adicione sua impressora com custo, vida útil e consumo em Watts.</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+  <div style="background:#ffffff;border:1px solid #e7e5e4;border-radius:10px;padding:1rem 1.25rem;">
+    <div style="font-family:'DM Mono',monospace;color:#ea580c;font-size:0.9rem;margin-bottom:0.4rem">01</div>
+    <div style="font-weight:600;color:#1c1917;margin-bottom:0.25rem">Cadastrar equipamento</div>
+    <div style="font-size:0.8rem;color:#a8a29e">Em Produtos → Impressoras: adicione sua impressora com custo, vida útil e consumo em Watts.</div>
   </div>
-  <div style="background:#0d0d0d;padding:1rem 1.25rem;">
-    <div style="font-family:'DM Mono',monospace;color:#f97316;font-size:0.9rem;margin-bottom:0.4rem">02</div>
-    <div style="font-weight:600;color:#e5e5e5;margin-bottom:0.25rem">Criar produtos com custos</div>
-    <div style="font-size:0.8rem;color:#525252">Em Produtos: cadastre cada peça e adicione custos extras (embalagem, frete, taxas) por produto.</div>
+  <div style="background:#ffffff;border:1px solid #e7e5e4;border-radius:10px;padding:1rem 1.25rem;">
+    <div style="font-family:'DM Mono',monospace;color:#ea580c;font-size:0.9rem;margin-bottom:0.4rem">02</div>
+    <div style="font-weight:600;color:#1c1917;margin-bottom:0.25rem">Criar produtos com custos</div>
+    <div style="font-size:0.8rem;color:#a8a29e">Em Produtos: cadastre cada peça e adicione custos extras (embalagem, frete, taxas) por produto.</div>
   </div>
-  <div style="background:#0d0d0d;padding:1rem 1.25rem;">
-    <div style="font-family:'DM Mono',monospace;color:#f97316;font-size:0.9rem;margin-bottom:0.4rem">03</div>
-    <div style="font-weight:600;color:#e5e5e5;margin-bottom:0.25rem">Registrar vendas</div>
-    <div style="font-size:0.8rem;color:#525252">Em Vendas: registre cada venda com produto, quantidade, canal e preço. O P&L atualiza em tempo real.</div>
+  <div style="background:#ffffff;border:1px solid #e7e5e4;border-radius:10px;padding:1rem 1.25rem;">
+    <div style="font-family:'DM Mono',monospace;color:#ea580c;font-size:0.9rem;margin-bottom:0.4rem">03</div>
+    <div style="font-weight:600;color:#1c1917;margin-bottom:0.25rem">Registrar vendas</div>
+    <div style="font-size:0.8rem;color:#a8a29e">Em Vendas: registre cada venda com produto, quantidade, canal e preço. O P&L atualiza em tempo real.</div>
   </div>
 </div>
 """, unsafe_allow_html=True)

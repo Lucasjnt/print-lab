@@ -15,11 +15,11 @@ aplicar_css()
 # ── Header ────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div style="margin-bottom:2rem;">
-  <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#f97316;">
+  <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#ea580c;">
     PRINT LAB
   </div>
   <h1 style="margin:0.25rem 0 0.5rem 0;">P&L</h1>
-  <p style="color:#525252;margin:0;font-size:0.95rem;">Demonstrativo de resultado completo por período.</p>
+  <p style="color:#a8a29e;margin:0;font-size:0.95rem;">Demonstrativo de resultado completo por período.</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -50,22 +50,25 @@ kpi_cards([
 # ── DRE Visual ────────────────────────────────────────────────────────────────
 secao("Demonstrativo de Resultado")
 
+cor_bruto = "#16a34a" if pl["margem_bruta_pct"] >= 40 else "#d97706"
+cor_liq   = "#16a34a" if pl["margem_liquida_pct"] >= 20 else "#dc2626"
+
 dre_itens = [
-    {"label": "(+) Receita Bruta",  "valor": pl["receita_total"],    "pct": 100.0,              "cor": "#ffffff", "destaque": False},
-    {"label": "(−) CMV",            "valor": -pl["cmv_total"],       "pct": -pl["cmv_total"]/pl["receita_total"]*100 if pl["receita_total"] else 0, "cor": "#f87171", "destaque": False},
-    {"label": "(=) Lucro Bruto",    "valor": pl["lucro_bruto"],      "pct": pl["margem_bruta_pct"],  "cor": "#4ade80" if pl["margem_bruta_pct"]>=40 else "#facc15", "destaque": True},
-    {"label": "(−) Custos Fixos",   "valor": -pl["custos_fixos_mes"],"pct": -pl["custos_fixos_mes"]/pl["receita_total"]*100 if pl["receita_total"] else 0, "cor": "#f87171", "destaque": False},
-    {"label": "(=) Lucro Líquido",  "valor": pl["lucro_liquido"],    "pct": pl["margem_liquida_pct"],"cor": "#4ade80" if pl["margem_liquida_pct"]>=20 else "#f87171", "destaque": True},
+    {"label": "(+) Receita Bruta",  "valor": pl["receita_total"],    "pct": 100.0,              "cor": "#1c1917", "destaque": False},
+    {"label": "(−) CMV",            "valor": -pl["cmv_total"],       "pct": -pl["cmv_total"]/pl["receita_total"]*100 if pl["receita_total"] else 0, "cor": "#dc2626", "destaque": False},
+    {"label": "(=) Lucro Bruto",    "valor": pl["lucro_bruto"],      "pct": pl["margem_bruta_pct"],  "cor": cor_bruto, "destaque": True},
+    {"label": "(−) Custos Fixos",   "valor": -pl["custos_fixos_mes"],"pct": -pl["custos_fixos_mes"]/pl["receita_total"]*100 if pl["receita_total"] else 0, "cor": "#dc2626", "destaque": False},
+    {"label": "(=) Lucro Líquido",  "valor": pl["lucro_liquido"],    "pct": pl["margem_liquida_pct"],"cor": cor_liq, "destaque": True},
 ]
 
 for item in dre_itens:
-    bg = "#111" if item["destaque"] else "#0d0d0d"
-    border = "2px solid #1e1e1e" if item["destaque"] else "1px solid #141414"
+    bg     = "#fff7ed" if item["destaque"] else "#ffffff"
+    border = "1px solid #fed7aa" if item["destaque"] else "1px solid #e7e5e4"
     st.markdown(f"""
     <div style="display:grid;grid-template-columns:1fr 140px 90px;align-items:center;
                 background:{bg};border:{border};border-radius:8px;
                 padding:0.85rem 1.25rem;margin-bottom:4px;">
-      <span style="color:{'#e5e5e5' if item['destaque'] else '#a3a3a3'};
+      <span style="color:{'#1c1917' if item['destaque'] else '#57534e'};
                    font-weight:{'600' if item['destaque'] else '400'}">
         {item['label']}
       </span>
@@ -73,7 +76,7 @@ for item in dre_itens:
                    text-align:right;font-size:{'1.05rem' if item['destaque'] else '0.95rem'}">
         R$ {item['valor']:,.2f}
       </span>
-      <span style="font-family:'DM Mono',monospace;color:#404040;text-align:right;font-size:0.8rem">
+      <span style="font-family:'DM Mono',monospace;color:#a8a29e;text-align:right;font-size:0.8rem">
         {item['pct']:.1f}%
       </span>
     </div>
@@ -86,15 +89,15 @@ secao("Ranking de Produtos por Margem")
 
 if ranking:
     st.markdown("""
-    <div style="background:#0d0d0d;border:1px solid #1e1e1e;border-radius:10px;overflow:hidden;">
+    <div style="background:#ffffff;border:1px solid #e7e5e4;border-radius:10px;overflow:hidden;">
       <div style="display:grid;grid-template-columns:24px 1fr 80px 100px 90px 100px;
-                  padding:0.6rem 1rem;border-bottom:1px solid #1e1e1e;">
-        <span style="font-size:0.65rem;color:#404040">#</span>
-        <span style="font-size:0.65rem;color:#404040;text-transform:uppercase;letter-spacing:0.08em">Produto</span>
-        <span style="font-size:0.65rem;color:#404040;text-transform:uppercase;letter-spacing:0.08em;text-align:center">Qtd</span>
-        <span style="font-size:0.65rem;color:#404040;text-transform:uppercase;letter-spacing:0.08em;text-align:right">Receita</span>
-        <span style="font-size:0.65rem;color:#404040;text-transform:uppercase;letter-spacing:0.08em;text-align:right">Lucro</span>
-        <span style="font-size:0.65rem;color:#404040;text-transform:uppercase;letter-spacing:0.08em;text-align:right">Margem</span>
+                  padding:0.6rem 1rem;border-bottom:1px solid #e7e5e4;background:#f5f5f4;">
+        <span style="font-size:0.65rem;color:#a8a29e">#</span>
+        <span style="font-size:0.65rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em">Produto</span>
+        <span style="font-size:0.65rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em;text-align:center">Qtd</span>
+        <span style="font-size:0.65rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em;text-align:right">Receita</span>
+        <span style="font-size:0.65rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em;text-align:right">Lucro</span>
+        <span style="font-size:0.65rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em;text-align:right">Margem</span>
       </div>
     """, unsafe_allow_html=True)
 
@@ -103,15 +106,15 @@ if ranking:
         largura = min(100, r["margem_pct"])
         st.markdown(f"""
       <div style="display:grid;grid-template-columns:24px 1fr 80px 100px 90px 100px;
-                  padding:0.85rem 1rem;border-bottom:1px solid #111;align-items:center;">
-        <span style="font-family:'DM Mono',monospace;color:#404040;font-size:0.75rem">{i+1:02d}</span>
-        <span style="color:#e5e5e5">{r['produto']}</span>
-        <span style="font-family:'DM Mono',monospace;color:#737373;text-align:center">{r['qtd_vendida']}</span>
-        <span style="font-family:'DM Mono',monospace;color:#a3a3a3;text-align:right;font-size:0.85rem">R$ {r['receita']:,.2f}</span>
-        <span style="font-family:'DM Mono',monospace;color:#4ade80;text-align:right">R$ {r['lucro']:,.2f}</span>
+                  padding:0.85rem 1rem;border-bottom:1px solid #f5f5f4;align-items:center;">
+        <span style="font-family:'DM Mono',monospace;color:#a8a29e;font-size:0.75rem">{i+1:02d}</span>
+        <span style="color:#1c1917">{r['produto']}</span>
+        <span style="font-family:'DM Mono',monospace;color:#78716c;text-align:center">{r['qtd_vendida']}</span>
+        <span style="font-family:'DM Mono',monospace;color:#57534e;text-align:right;font-size:0.85rem">R$ {r['receita']:,.2f}</span>
+        <span style="font-family:'DM Mono',monospace;color:#16a34a;text-align:right">R$ {r['lucro']:,.2f}</span>
         <div style="text-align:right;">
           <span style="font-family:'DM Mono',monospace;color:{cor}">{r['margem_pct']:.1f}%</span>
-          <div style="background:#1a1a1a;border-radius:3px;height:3px;margin-top:4px;overflow:hidden;">
+          <div style="background:#f5f5f4;border-radius:3px;height:3px;margin-top:4px;overflow:hidden;">
             <div style="width:{largura:.0f}%;height:100%;background:{cor};"></div>
           </div>
         </div>
@@ -120,7 +123,7 @@ if ranking:
 
     st.markdown("</div>", unsafe_allow_html=True)
 else:
-    st.markdown('<p style="color:#404040">Nenhuma venda no período.</p>', unsafe_allow_html=True)
+    st.markdown('<p style="color:#a8a29e">Nenhuma venda no período.</p>', unsafe_allow_html=True)
 
 # ── Detalhamento ──────────────────────────────────────────────────────────────
 with st.expander("Detalhamento de vendas"):
@@ -151,55 +154,59 @@ col2.download_button(
 
 # ── Custos Fixos ──────────────────────────────────────────────────────────────
 st.markdown("---")
-secao("Custos Fixos Mensais")
 
-custos_fixos = listar_custos_fixos()
-col_lista, col_form = st.columns([1.5, 1])
+@st.fragment
+def secao_custos_fixos():
+    secao("Custos Fixos Mensais")
+    custos_fixos = listar_custos_fixos()
+    col_lista, col_form = st.columns([1.5, 1])
 
-with col_lista:
-    if custos_fixos:
-        total_fixos = sum(cf["valor"] if cf["periodo"]=="mensal" else cf["valor"]/12 for cf in custos_fixos)
+    with col_lista:
+        if custos_fixos:
+            total_fixos = sum(cf["valor"] if cf["periodo"]=="mensal" else cf["valor"]/12 for cf in custos_fixos)
+            for cf in custos_fixos:
+                val_mes = cf["valor"] if cf["periodo"] == "mensal" else cf["valor"] / 12
+                with st.expander(f"**{cf['nome']}** — R$ {val_mes:.2f}/mês"):
+                    with st.form(f"edit_cf_{cf['id']}"):
+                        c1, c2, c3 = st.columns([2, 1, 1])
+                        n_cf = c1.text_input("Nome", value=cf["nome"])
+                        v_cf = c2.number_input("Valor (R$)", value=float(cf["valor"]), step=10.0)
+                        p_cf = c3.selectbox("Período", ["mensal","anual"],
+                                             index=0 if cf["periodo"]=="mensal" else 1,
+                                             format_func=lambda x: "Mensal" if x=="mensal" else "Anual (÷12)")
+                        col_s, col_d = st.columns([3, 1])
+                        if col_s.form_submit_button("Salvar", type="primary", use_container_width=True):
+                            atualizar_custo_fixo(cf["id"], n_cf, v_cf, p_cf)
+                            st.success("Salvo.")
+                            st.rerun()
+                        if col_d.form_submit_button("Excluir", type="secondary", use_container_width=True):
+                            deletar_custo_fixo(cf["id"])
+                            st.rerun()
 
-        for cf in custos_fixos:
-            val_mes = cf["valor"] if cf["periodo"] == "mensal" else cf["valor"] / 12
-            with st.expander(f"**{cf['nome']}** — R$ {val_mes:.2f}/mês"):
-                with st.form(f"edit_cf_{cf['id']}"):
-                    c1, c2, c3 = st.columns([2, 1, 1])
-                    n_cf  = c1.text_input("Nome", value=cf["nome"])
-                    v_cf  = c2.number_input("Valor (R$)", value=float(cf["valor"]), step=10.0)
-                    p_cf  = c3.selectbox("Período", ["mensal","anual"],
-                                         index=0 if cf["periodo"]=="mensal" else 1,
-                                         format_func=lambda x: "Mensal" if x=="mensal" else "Anual (÷12)")
-                    col_s, col_d = st.columns([3, 1])
-                    if col_s.form_submit_button("Salvar", type="primary", use_container_width=True):
-                        atualizar_custo_fixo(cf["id"], n_cf, v_cf, p_cf)
-                        st.success("Salvo.")
-                        st.rerun()
-                    if col_d.form_submit_button("Excluir", type="secondary", use_container_width=True):
-                        deletar_custo_fixo(cf["id"])
-                        st.rerun()
+            st.markdown(f"""
+            <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;
+                        display:flex;justify-content:space-between;padding:0.75rem 1rem;margin-top:0.5rem;">
+              <span style="color:#57534e;font-weight:600">Total / mês</span>
+              <span style="font-family:'DM Mono',monospace;color:#ea580c">R$ {total_fixos:.2f}</span>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown('<div style="background:#ffffff;border:1px dashed #e7e5e4;border-radius:10px;padding:2rem;text-align:center;color:#a8a29e;font-size:0.9rem">Nenhum custo fixo cadastrado.</div>', unsafe_allow_html=True)
 
-        st.markdown(f"""
-        <div style="background:#111;border:1px solid #1e1e1e;border-radius:8px;
-                    display:flex;justify-content:space-between;padding:0.75rem 1rem;margin-top:0.5rem;">
-          <span style="color:#737373;font-weight:600">Total / mês</span>
-          <span style="font-family:'DM Mono',monospace;color:#ffffff">R$ {total_fixos:.2f}</span>
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.markdown('<div style="background:#0d0d0d;border:1px dashed #2a2a2a;border-radius:10px;padding:2rem;text-align:center;color:#404040;font-size:0.9rem">Nenhum custo fixo cadastrado.</div>', unsafe_allow_html=True)
+    with col_form:
+        with st.form("form_cf"):
+            st.markdown('<div style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#a8a29e;margin-bottom:1rem">Adicionar</div>', unsafe_allow_html=True)
+            nome_cf   = st.text_input("Nome", placeholder="ex: Aluguel, Internet, Shopee")
+            valor_cf  = st.number_input("Valor (R$)", value=0.01, min_value=0.01, step=10.0)
+            periodo_cf = st.selectbox("Período", ["mensal", "anual"],
+                                       format_func=lambda x: "Mensal" if x == "mensal" else "Anual (÷12)")
+            if st.form_submit_button("Adicionar", type="primary", use_container_width=True):
+                if nome_cf and valor_cf > 0:
+                    inserir_custo_fixo(nome_cf, valor_cf, periodo_cf)
+                    st.success(f"'{nome_cf}' adicionado.")
+                    st.rerun()
+                else:
+                    st.error("Preencha nome e valor.")
 
-with col_form:
-    with st.form("form_cf"):
-        st.markdown('<div style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#737373;margin-bottom:1rem">Adicionar</div>', unsafe_allow_html=True)
-        nome_cf  = st.text_input("Nome", placeholder="ex: Aluguel, Internet, Shopee")
-        valor_cf = st.number_input("Valor (R$)", value=0.0, min_value=0.01, step=10.0)
-        periodo_cf = st.selectbox("Período", ["mensal", "anual"],
-                                   format_func=lambda x: "Mensal" if x == "mensal" else "Anual (÷12)")
-        if st.form_submit_button("Adicionar", type="primary", use_container_width=True):
-            if nome_cf and valor_cf > 0:
-                inserir_custo_fixo(nome_cf, valor_cf, periodo_cf)
-                st.success(f"'{nome_cf}' adicionado.")
-                st.rerun()
-            else:
-                st.error("Preencha nome e valor.")
+
+secao_custos_fixos()
